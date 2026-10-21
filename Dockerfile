@@ -1,5 +1,10 @@
 FROM richarvey/nginx-php-fpm:3.1.6
 
+# Install Node.js and npm (required for building Vite assets)
+USER root
+RUN apk update && \
+    apk add --no-cache nodejs npm
+
 COPY . .
 
 ENV SKIP_COMPOSER 1
