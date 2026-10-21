@@ -2,8 +2,8 @@
 echo "Running composer"
 composer install --no-dev --working-dir=/var/www/html
 
-echo "Generating app key..."
-php artisan key:generate --show
+echo "Clearing old config cache..."
+php artisan config:clear
 
 echo "Caching config..."
 php artisan config:cache
