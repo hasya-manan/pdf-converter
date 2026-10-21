@@ -1,12 +1,37 @@
+# ==========================================
+# Stage 1: Build the Vue/Frontend Assets
+# ==========================================
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+# Copy only package files first to leverage Docker cache
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the frontend source code
+COPY resources/ ./resources/
+COPY vite.config.js ./
+COPY public/ ./public/
+COPY tailwind.config.js* ./
+COPY postcss.config.js* ./
+
+# Build the production assets (creates public/build/manifest.json)
+RUN npm run build
+
+
+# ==========================================
+# Stage 2: Final PHP + Nginx Environment
+# ==========================================
 FROM richarvey/nginx-php-fpm:3.1.6
 
-# Install Node.js and npm (required for building Vite assets)
-USER root
-RUN apk update && \
-    apk add --no-cache nodejs npm
-
+# Copy the entire application code
 COPY . .
 
+# Copy the built Vue assets from Stage 1 into the PHP environment
+COPY --from=frontend /app/public/build ./public/build
+
+# Render-specific environment variables for this image
 ENV SKIP_COMPOSER 1
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
