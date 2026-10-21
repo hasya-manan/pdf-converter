@@ -2,6 +2,9 @@
 echo "Running composer"
 composer install --no-dev --working-dir=/var/www/html
 
+echo "Creating SQLite database if it doesn't exist..."
+touch /var/www/html/database/database.sqlite
+
 echo "Clearing old config cache..."
 php artisan config:clear
 
