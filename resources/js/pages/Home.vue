@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref, computed } from 'vue';
 
@@ -8,6 +7,9 @@ const isDragging = ref(false);
 const isUploading = ref(false);
 const message = ref('');
 const isError = ref(false);
+
+// New state for the download button
+const downloadUrl = ref(null);
 
 // Dropdown logic
 const formatKey = ref('pdf-to-word');
@@ -38,6 +40,7 @@ const handleDrop = (e) => {
 // Validate and set file
 const processFile = (selectedFile) => {
     message.value = '';
+    downloadUrl.value = null; // Reset download link if new file is selected
     const ext = selectedFile.name.split('.').pop().toLowerCase();
     
     // Simple validation
@@ -55,23 +58,21 @@ const processFile = (selectedFile) => {
     file.value = selectedFile;
 };
 
-// Submit (We will connect this to Laravel next)
 // Submit to Laravel Backend
 const submitFile = async () => {
     if (!file.value) return;
     
     isUploading.value = true;
     message.value = '';
+    downloadUrl.value = null; // Clear previous download link
     
     const formData = new FormData();
     formData.append('file', file.value);
     formData.append('format', formatKey.value);
 
     try {
-        // 1. Get the CSRF token from the meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // 2. Change URL to /convert and add the CSRF header
         const response = await fetch('/convert', {
             method: 'POST',
             body: formData,
@@ -85,7 +86,8 @@ const submitFile = async () => {
 
         if (response.ok) {
             isError.value = false;
-            message.value = data.message; 
+            message.value = "Conversion successful! Your file is ready.";
+            downloadUrl.value = data.download_url; // Save the URL to show the button
         } else {
             isError.value = true;
             message.value = data.message || 'Validation error occurred.';
@@ -166,7 +168,7 @@ const submitFile = async () => {
                         class="w-8 h-8 flex items-center justify-center rounded font-bold text-xs"
                         :class="{
                             'bg-red-100 text-red-600': selectedFormat.to === 'PDF',
-                            'bg-blue-100 text-blue-600': selectedFormat.to === 'W' || selectedFormat.to === 'Word' // just in case
+                            'bg-blue-100 text-blue-600': selectedFormat.to === 'W' || selectedFormat.to === 'Word'
                         }"
                     >
                         {{ selectedFormat.to }}
@@ -183,13 +185,13 @@ const submitFile = async () => {
                 </svg>
 
                 <!-- Hidden Select -->
-                <select v-model="formatKey" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                <select v-model="formatKey" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" @change="downloadUrl = null; message = ''">
                     <option value="pdf-to-word">PDF to Word</option>
                     <option value="word-to-pdf">Word to PDF</option>
                 </select>
             </div>
 
-            <!-- Action Button -->
+            <!-- Action Button (Convert) -->
             <button 
                 @click="submitFile"
                 :disabled="!file || isUploading"
@@ -200,6 +202,18 @@ const submitFile = async () => {
                 <span v-if="isUploading">Converting...</span>
                 <span v-else>Convert Now</span>
             </button>
+
+            <!-- NEW: Download Button (Only shows when URL is available) -->
+            <a 
+                v-if="downloadUrl" 
+                :href="downloadUrl"
+                class="mt-3 w-full py-3 px-4 rounded-xl text-white font-semibold text-lg transition-all flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/30"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download File</span>
+            </a>
 
             <!-- Message -->
             <div v-if="message" class="mt-4 p-3 rounded-lg text-sm text-center" :class="isError ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">

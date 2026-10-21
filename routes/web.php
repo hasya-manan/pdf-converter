@@ -7,3 +7,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::post('/convert', [ConversionController::class, 'convert']);
+Route::get('/download/{filename}', [ConversionController::class, 'download']);
