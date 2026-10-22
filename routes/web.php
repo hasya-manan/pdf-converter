@@ -6,5 +6,5 @@ use App\Http\Controllers\ConversionController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::post('/convert', [ConversionController::class, 'convert']);
-Route::get('/download/{filename}', [ConversionController::class, 'download']);
+Route::post('/convert', [ConversionController::class, 'convert'])->name('convert');
+Route::get('/download/{filename}', [ConversionController::class, 'download'])->name('download');

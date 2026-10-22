@@ -73,7 +73,8 @@ const submitFile = async () => {
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        const response = await fetch('/convert', {
+        //const response = await fetch('/convert', {
+        const response = await fetch(window.location.origin + '/convert', {
             method: 'POST',
             body: formData,
             headers: {
