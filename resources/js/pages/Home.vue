@@ -101,6 +101,37 @@ const submitFile = async () => {
         isUploading.value = false;
     }
 };
+
+const isDownloading = ref(false);
+
+const downloadFile = async () => {
+    if (!downloadUrl.value) return;
+    
+    isDownloading.value = true;
+    try {
+        const response = await fetch(downloadUrl.value);
+        const blob = await response.blob();
+        
+        // Get the filename from the URL (e.g., Doc1.pdf)
+        const urlParams = new URLSearchParams(downloadUrl.value.split('?')[1]);
+        const filename = urlParams.get('name') || 'converted-file';
+        
+        // Create a temporary link and force the download
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        
+    } catch (error) {
+        console.error("Download failed", error);
+    } finally {
+        isDownloading.value = false;
+    }
+};
 </script>
 
 <template>
@@ -205,16 +236,18 @@ const submitFile = async () => {
             </button>
 
             <!-- NEW: Download Button (Only shows when URL is available) -->
-            <a 
-                v-if="downloadUrl" 
-                :href="downloadUrl"
-                class="mt-3 w-full py-3 px-4 rounded-xl text-white font-semibold text-lg transition-all flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/30"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Download File</span>
-            </a>
+            <!-- Replace the green button with this -->
+                <button 
+                    v-if="downloadUrl" 
+                    @click="downloadFile"
+                    :disabled="isDownloading"
+                    class="mt-3 w-full py-3 px-4 rounded-xl text-white font-semibold text-lg transition-all flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/30 disabled:bg-gray-400"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>{{ isDownloading ? 'Downloading...' : 'Download File' }}</span>
+                </button>
 
             <!-- Message -->
             <div v-if="message" class="mt-4 p-3 rounded-lg text-sm text-center" :class="isError ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
