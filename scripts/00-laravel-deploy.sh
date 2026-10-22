@@ -20,8 +20,9 @@ php artisan optimize:clear
 echo "Caching new config..."
 php artisan config:cache
 
-echo "Listing all registered routes:"
+echo "================ ROUTE LIST ================"
 php artisan route:list
+echo "============================================"
 
 echo "Caching new routes..."
 php artisan route:cache
