@@ -66,18 +66,25 @@ class ConversionController extends Controller
         }
     }
 
-        public function download(Request $request, $filename)
+           public function download(Request $request, $filename)
     {
-        $path = storage_path('app/public/temp/' . $filename);
+        // Check multiple possible locations
+        $paths = [
+            storage_path('app/public/temp/' . $filename),
+            storage_path('app/temp/' . $filename),
+            public_path('temp/' . $filename),
+        ];
 
-        if (!file_exists($path)) {
-            return response()->json(['error' => 'File not found'], 404);
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                // Get the custom name from the URL, or fallback to the random name
+                $downloadName = $request->query('name', $filename);
+                
+                // Download the file with the custom name, and delete it afterward
+                return response()->download($path, $downloadName)->deleteFileAfterSend(true);
+            }
         }
 
-        // Get the custom name from the URL, or fallback to the random name
-        $downloadName = $request->query('name', $filename);
-
-        // Download the file with the custom name, and delete it afterward
-        return response()->download($path, $downloadName)->deleteFileAfterSend(true);
+        return response()->json(['error' => 'File not found on server. It may have been deleted after a server restart.'], 404);
     }
 }
