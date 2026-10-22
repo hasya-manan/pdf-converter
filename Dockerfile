@@ -17,6 +17,8 @@ FROM php:8.2.35-fpm-alpine
 RUN apk add --no-cache bash nginx supervisor libpq libzip icu-libs \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS postgresql-dev libzip-dev icu-dev \
     && docker-php-ext-install pdo_pgsql pdo_mysql intl zip opcache \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apk del .build-deps
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

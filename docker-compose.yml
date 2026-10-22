@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. The Public Gateway (Laravel + Vue)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdf_app
+    ports:
+      - "8080:80" # ONLY this port is exposed to your Windows machine
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=pdf_converter
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=secretpassword
+      - CACHE_STORE=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - APP_KEY=base64:lTeKdqXTcoIRU3eKC9rBGE9FX/hsTxl7brqJzQFXV48=
+    depends_on:
+      - db
+      - redis
+    networks:
+      - internal_network
+
+  # 2. The Private Database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: pdf_db
+    # Notice there are NO "ports" here. It is completely private.
+    environment:
+      MYSQL_DATABASE: pdf_converter
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: secretpassword
+      MYSQL_USER: laravel
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal_network
+
+  # 3. The Private Cache (Redis)
+  redis:
+    image: redis:alpine
+    container_name: pdf_redis
+    # Notice there are NO "ports" here either.
+    networks:
+      - internal_network
+
+# Define the private network
+networks:
+  internal_network:
+    driver: bridge
+
+# Define the volume for MySQL
+volumes:
+  db_data:

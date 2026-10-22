@@ -12,8 +12,8 @@ php artisan view:cache
 echo "Creating SQLite database if it doesn't exist..."
 touch /var/www/html/database/database.sqlite
 
-echo "Running migrations..."
-php artisan migrate --force
+# echo "Running migrations..."
+# php artisan migrate --force
 
 echo "Linking storage..."
 php artisan storage:link
