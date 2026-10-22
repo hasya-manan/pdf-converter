@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConversionController;
 
+Route::get('/ping', function () {
+    return 'pong';
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
