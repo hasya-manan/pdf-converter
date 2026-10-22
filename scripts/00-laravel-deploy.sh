@@ -13,10 +13,9 @@ chmod -R 775 /var/www/html/database
 echo "Linking storage..."
 php artisan storage:link
 
-# CRITICAL FIX: Clear old caches first
-echo "Clearing old config and route caches..."
-php artisan config:clear
-php artisan route:clear 
+# Use optimize:clear to wipe EVERYTHING
+echo "Clearing all caches..."
+php artisan optimize:clear
 
 echo "Caching new config..."
 php artisan config:cache
