@@ -18,5 +18,8 @@ php artisan migrate --force
 echo "Linking storage..."
 php artisan storage:link
 
+chmod -R 777 /var/www/html/storage
+chmod -R 777 /var/www/html/public
+
 echo "Starting Supervisor (Nginx + PHP-FPM)..."
 exec /usr/bin/supervisord -c /etc/supervisord.conf
