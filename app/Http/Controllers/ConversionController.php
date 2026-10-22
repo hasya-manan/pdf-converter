@@ -57,8 +57,10 @@ class ConversionController extends Controller
                 'download_url' => url('/download/' . $outputName . '?name=' . urlencode($originalName . '.' . $outputExtension))
             ]);
 
-        } catch (Exception $e) {
-            // If anything fails, return the error message to the frontend
+               } catch (Exception $e) {
+            // Log the error so we can see it in Render!
+            \Log::error('Conversion Failed: ' . $e->getMessage());
+            
             return response()->json([
                 'message' => 'Conversion failed: ' . $e->getMessage(),
                 'status' => 'error'

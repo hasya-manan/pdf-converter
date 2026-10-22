@@ -53,6 +53,7 @@ ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
+RUN mkdir -p /var/www/html/storage/app/public/temp && chmod -R 777 /var/www/html/storage
 EXPOSE 80
 
 CMD ["/start.sh"]
